@@ -35,9 +35,11 @@ class LLMsReport(BaseModel):
 
 class JavaScriptReport(BaseModel):
     raw_word_count: int
-    rendered_word_count: int
-    raw_to_rendered_ratio: float
-    js_reliant: bool
+    rendered_word_count: int | None
+    raw_to_rendered_ratio: float | None
+    js_reliant: bool | None
+    rendering_available: bool = True
+    error: str | None = None
 
 
 class SchemaReport(BaseModel):
