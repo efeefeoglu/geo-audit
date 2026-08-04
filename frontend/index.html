@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="geo-audit-api-url" content="http://localhost:8000" />
+    <meta
+      name="description"
+      content="Check how easily AI systems can discover and understand a website."
+    />
+    <title>Geo Audit</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="intro" aria-labelledby="page-title">
+        <p class="eyebrow">AI visibility checker</p>
+        <h1 id="page-title">See how your website looks to AI.</h1>
+        <p class="lede">
+          Enter a public URL to check its robots rules, LLM guidance, JavaScript reliance,
+          and structured data.
+        </p>
+
+        <form id="audit-form" class="audit-form">
+          <label for="website-url">Website URL</label>
+          <div class="input-row">
+            <input
+              id="website-url"
+              name="url"
+              type="url"
+              inputmode="url"
+              autocomplete="url"
+              placeholder="https://example.com"
+              required
+            />
+            <button id="submit-button" type="submit">
+              <span class="button-label">Run audit</span>
+              <span class="spinner" aria-hidden="true"></span>
+            </button>
+          </div>
+          <p class="hint">The audit can take a few seconds while the page is rendered.</p>
+        </form>
+      </section>
+
+      <section id="result-panel" class="result-panel" aria-labelledby="result-title" hidden>
+        <div class="result-heading">
+          <div>
+            <p class="eyebrow">Audit result</p>
+            <h2 id="result-title">Backend response</h2>
+          </div>
+          <button id="copy-button" class="copy-button" type="button">Copy JSON</button>
+        </div>
+        <p id="status-message" class="status-message" role="status" aria-live="polite"></p>
+        <pre id="response-output" tabindex="0"></pre>
+      </section>
+    </main>
+  </body>
+</html>
