@@ -38,6 +38,8 @@ class JavaScriptReport(BaseModel):
     rendered_word_count: int
     raw_to_rendered_ratio: float
     js_reliant: bool
+    rendering_available: bool = True
+    error: str | None = None
 
 
 class SchemaReport(BaseModel):

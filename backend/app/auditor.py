@@ -8,6 +8,7 @@ from urllib.robotparser import RobotFileParser
 import httpx
 from bs4 import BeautifulSoup
 from markdown_it import MarkdownIt
+from playwright.async_api import Error as PlaywrightError
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 from playwright.async_api import async_playwright
 
@@ -117,6 +118,37 @@ async def render_html(url: str) -> str:
         raise RuntimeError("The browser timed out while rendering the page") from exc
 
 
+async def check_javascript(url: str, raw_html: str) -> JavaScriptReport:
+    """Compare raw and rendered content without failing the entire audit.
+
+    Browser binaries are not available in every serverless runtime. The other
+    audit checks remain useful in that environment, so return an explicit
+    partial result instead of allowing Playwright's launch error to become an
+    opaque HTTP 500 response.
+    """
+    raw_words = _body_word_count(raw_html)
+    try:
+        rendered_html = await render_html(url)
+    except (PlaywrightError, RuntimeError, OSError) as exc:
+        return JavaScriptReport(
+            raw_word_count=raw_words,
+            rendered_word_count=raw_words,
+            raw_to_rendered_ratio=1.0,
+            js_reliant=False,
+            rendering_available=False,
+            error=f"Browser rendering unavailable: {exc}",
+        )
+
+    rendered_words = _body_word_count(rendered_html)
+    ratio = raw_words / rendered_words if rendered_words else 1.0
+    return JavaScriptReport(
+        raw_word_count=raw_words,
+        rendered_word_count=rendered_words,
+        raw_to_rendered_ratio=round(ratio, 3),
+        js_reliant=rendered_words > 0 and ratio < 0.2,
+    )
+
+
 async def run_audit(url: str) -> AuditResponse:
     await validate_public_url(url)
     timeout = httpx.Timeout(settings.request_timeout_seconds)
@@ -127,18 +159,16 @@ async def run_audit(url: str) -> AuditResponse:
         root = _site_root(final_url)
         robots_task = check_robots(client, root)
         llms_tasks = [check_llms_file(client, urljoin(root, name)) for name in ("llms.txt", "llms-full.txt")]
-        rendered_task = render_html(final_url)
-        robots, *rest = await asyncio.gather(robots_task, *llms_tasks, rendered_task)
+        javascript_task = check_javascript(final_url, raw_html)
+        robots, *rest = await asyncio.gather(robots_task, *llms_tasks, javascript_task)
 
     llms_files = rest[:-1]
-    rendered_html = rest[-1]
-    raw_words, rendered_words = _body_word_count(raw_html), _body_word_count(rendered_html)
-    ratio = raw_words / rendered_words if rendered_words else 1.0
+    javascript = rest[-1]
     return AuditResponse(
         requested_url=url,
         final_url=final_url,
         robots=robots,
         llms=LLMsReport(passed=any(item.valid_markdown for item in llms_files), files=llms_files),
-        javascript=JavaScriptReport(raw_word_count=raw_words, rendered_word_count=rendered_words, raw_to_rendered_ratio=round(ratio, 3), js_reliant=rendered_words > 0 and ratio < 0.2),
+        javascript=javascript,
         schema=extract_schema(raw_html),
     )
