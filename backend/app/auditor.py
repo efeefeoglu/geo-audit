@@ -26,6 +26,10 @@ from .security import validate_public_url
 
 AI_AGENTS = ("OAI-SearchBot", "PerplexityBot", "ClaudeBot", "GPTBot", "ChatGPT-User")
 KEY_ENTITIES = ("Organization", "WebSite", "Article", "Product")
+RENDERING_UNAVAILABLE_MESSAGE = (
+    "Browser rendering is unavailable in this deployment; "
+    "JavaScript reliance could not be evaluated."
+)
 
 
 def _site_root(url: str) -> str:
@@ -129,14 +133,14 @@ async def check_javascript(url: str, raw_html: str) -> JavaScriptReport:
     raw_words = _body_word_count(raw_html)
     try:
         rendered_html = await render_html(url)
-    except (PlaywrightError, RuntimeError, OSError) as exc:
+    except (PlaywrightError, RuntimeError, OSError):
         return JavaScriptReport(
             raw_word_count=raw_words,
-            rendered_word_count=raw_words,
-            raw_to_rendered_ratio=1.0,
-            js_reliant=False,
+            rendered_word_count=None,
+            raw_to_rendered_ratio=None,
+            js_reliant=None,
             rendering_available=False,
-            error=f"Browser rendering unavailable: {exc}",
+            error=RENDERING_UNAVAILABLE_MESSAGE,
         )
 
     rendered_words = _body_word_count(rendered_html)

@@ -30,10 +30,14 @@ def test_javascript_check_reports_unavailable_browser(monkeypatch):
     report = asyncio.run(check_javascript("https://example.com", "<body>Raw content</body>"))
 
     assert report.rendering_available is False
-    assert report.error == "Browser rendering unavailable: Executable doesn't exist"
+    assert report.error == (
+        "Browser rendering is unavailable in this deployment; "
+        "JavaScript reliance could not be evaluated."
+    )
     assert report.raw_word_count == 2
-    assert report.rendered_word_count == 2
-    assert report.js_reliant is False
+    assert report.rendered_word_count is None
+    assert report.raw_to_rendered_ratio is None
+    assert report.js_reliant is None
 
 
 def test_javascript_check_compares_rendered_content(monkeypatch):

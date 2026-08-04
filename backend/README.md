@@ -16,6 +16,11 @@ Configuration uses environment variables prefixed with `GEO_AUDIT_`, including
 `GEO_AUDIT_REQUEST_TIMEOUT_SECONDS`, `GEO_AUDIT_BROWSER_TIMEOUT_MS`, and
 `GEO_AUDIT_MAX_RESPONSE_BYTES`.
 
+The `javascript.rendering_available` response field indicates whether the
+JavaScript rendering check ran. A value of `false` is a partial-audit warning,
+not a failure of the entire request. In that case, rendered-only measurements
+are `null`, and the other audit sections remain valid.
+
 ## Container
 
 ```bash
