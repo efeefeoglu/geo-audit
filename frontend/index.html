@@ -47,12 +47,36 @@
         <div class="result-heading">
           <div>
             <p class="eyebrow">Audit result</p>
-            <h2 id="result-title">Backend response</h2>
+            <h2 id="result-title">Your AI visibility report</h2>
+            <p id="result-url" class="result-url"></p>
           </div>
-          <button id="copy-button" class="copy-button" type="button">Copy JSON</button>
+          <button id="copy-button" class="copy-button" type="button" hidden>Copy JSON</button>
         </div>
         <p id="status-message" class="status-message" role="status" aria-live="polite"></p>
-        <pre id="response-output" tabindex="0"></pre>
+
+        <div id="report-content" class="report-content" hidden>
+          <section class="score-card" aria-label="Audit overview">
+            <div id="score-ring" class="score-ring" aria-label="0 out of 100">
+              <div><strong id="score-value">0</strong><span>/100</span></div>
+            </div>
+            <div class="score-copy">
+              <p class="score-label">Overall visibility</p>
+              <h3 id="score-title">Reviewing your site</h3>
+              <p id="score-description"></p>
+            </div>
+            <div class="score-stats">
+              <div><strong id="passed-count">0</strong><span>checks passed</span></div>
+              <div><strong id="attention-count">0</strong><span>need attention</span></div>
+            </div>
+          </section>
+
+          <div id="check-grid" class="check-grid"></div>
+
+          <details class="technical-details">
+            <summary>View technical details <span>Raw JSON response</span></summary>
+            <pre id="response-output" tabindex="0"></pre>
+          </details>
+        </div>
       </section>
     </main>
   </body>
